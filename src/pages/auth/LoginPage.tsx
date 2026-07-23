@@ -3,10 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router'
 import { AlertCircle, Building2, CheckCircle, ChevronLeft, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { COMPANY_SUPPORT_PHONE_DISPLAY, COMPANY_TEL_URL, buildCompanyWhatsAppUrl } from '@/config/companyContact'
 import {
   AdminApiError,
   getAdminLoginStats,
   loginAdmin,
+  readAdminSession,
   REDIRECT_AFTER_LOGIN_KEY,
   storeAdminSession,
   type AdminLoginStats,
@@ -40,6 +42,14 @@ export function LoginPage() {
   const [welcomeToast, setWelcomeToast] = useState<string | null>(null)
   const [loginStats, setLoginStats] = useState<AdminLoginStats | null>(null)
   const [statsUnavailable, setStatsUnavailable] = useState(false)
+
+  useEffect(() => {
+    const session = readAdminSession()
+    if (session) {
+      const redirectTo = searchParams.get('redirect')
+      navigate(isSafeAdminRedirect(redirectTo) ? redirectTo : '/admin/overview', { replace: true })
+    }
+  }, [navigate, searchParams])
 
   useEffect(() => {
     let active = true
@@ -94,8 +104,18 @@ export function LoginPage() {
         navigate('/admin/overview')
       }
     } catch (err) {
-      setAuthError(err instanceof AdminApiError ? err.message : 'Could not sign in. Please try again.')
+      const isNetworkError =
+        err instanceof TypeError ||
+        (err instanceof Error && /failed to fetch|network|load failed/i.test(err.message))
+      setAuthError(
+        isNetworkError
+          ? 'Cannot reach the API server. Start the backend with `npm run dev` in Backend-V1 (port 3000).'
+          : err instanceof AdminApiError
+            ? err.message
+            : 'Could not sign in. Please try again.',
+      )
       setPassword('')
+    } finally {
       setLoading(false)
     }
   }
@@ -311,6 +331,19 @@ export function LoginPage() {
             Having trouble? Contact{' '}
             <a href="mailto:support@builtglory.com" className="text-primary hover:underline">
               support@builtglory.com
+            </a>
+            {' · '}
+            <a href={COMPANY_TEL_URL} className="text-primary hover:underline">
+              {COMPANY_SUPPORT_PHONE_DISPLAY}
+            </a>
+            {' · '}
+            <a
+              href={buildCompanyWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              WhatsApp
             </a>
           </p>
         </div>

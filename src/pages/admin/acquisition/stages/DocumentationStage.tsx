@@ -1220,6 +1220,7 @@ export function DocumentationStage({ acquisition, onStageChange }: Documentation
         partyPhone={acquisition.sellerPhone}
         partyEmail={acquisition.sellerEmail}
         partyType="seller"
+        partyUserId={acquisition.sellerUserId}
         propertyTitle={acquisition.propertyTitle}
         documents={documents}
         setDocuments={setPersistedDocuments}

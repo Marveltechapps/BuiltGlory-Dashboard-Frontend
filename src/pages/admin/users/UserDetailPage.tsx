@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatAdminApiError, readAdminSession } from '@/api/admin'
+import { sendAdminPushNotification } from '@/api/adminPushNotifications'
 import {
   exportAdminUserData,
   getAdminUser,
@@ -508,6 +509,7 @@ export function UserDetailPage() {
   const [pushOpen, setPushOpen] = useState(false)
   const [pushTitle, setPushTitle] = useState('')
   const [pushMessage, setPushMessage] = useState('')
+  const [pushSending, setPushSending] = useState(false)
 
   const [blockOpen, setBlockOpen] = useState(false)
   const [blockReason, setBlockReason] = useState(BLOCK_REASONS[0])
@@ -817,6 +819,37 @@ export function UserDetailPage() {
       setEmailSending(false)
     }
   }, [emailBody, emailSubject, refreshSentMessages, showToast, user])
+
+  const sendUserPush = useCallback(async () => {
+    if (!user?.id || !pushTitle.trim() || !pushMessage.trim()) {
+      showToast('Title and message are required.')
+      return
+    }
+    const session = readAdminSession()
+    if (!session?.accessToken) {
+      showToast('Admin session expired. Please sign in again.')
+      return
+    }
+    setPushSending(true)
+    try {
+      const audience = user.role === 'seller' ? 'seller' : 'buyer'
+      await sendAdminPushNotification(session.accessToken, {
+        userId: user.id,
+        audience,
+        notificationType: 'MANUAL',
+        title: pushTitle.trim(),
+        message: pushMessage.trim(),
+      })
+      setPushOpen(false)
+      setPushTitle('')
+      setPushMessage('')
+      showToast('Push notification sent')
+    } catch (error) {
+      showToast(formatAdminApiError(error, 'Could not send push notification'))
+    } finally {
+      setPushSending(false)
+    }
+  }, [pushMessage, pushTitle, showToast, user])
 
   const exportUserData = useCallback(async () => {
     if (!user) return
@@ -1833,12 +1866,10 @@ export function UserDetailPage() {
           />
           <Button
             className="mt-3 w-full"
-            onClick={() => {
-              setPushOpen(false)
-              showToast('Push notification sent')
-            }}
+            disabled={!pushTitle.trim() || !pushMessage.trim() || pushSending}
+            onClick={() => void sendUserPush()}
           >
-            Send
+            {pushSending ? 'Sending…' : 'Send'}
           </Button>
         </Modal>
       )}

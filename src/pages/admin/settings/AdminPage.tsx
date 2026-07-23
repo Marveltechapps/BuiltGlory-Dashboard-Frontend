@@ -29,6 +29,7 @@ import {
   type SupportTicket,
 } from '@/api/adminSupport'
 import { cn } from '@/lib/utils'
+import { COMPANY_SUPPORT_PHONE_DISPLAY } from '@/config/companyContact'
 import { hoursSince } from '@/utils/timer'
 import { readAdminSession } from '@/api/admin'
 import {
@@ -472,7 +473,7 @@ export function AdminPage() {
     name: 'Builtglory',
     tagline: 'Find. Flip. Flourish.',
     email: 'support@builtglory.com',
-    phone: '+91 80 1234 5678',
+    phone: COMPANY_SUPPORT_PHONE_DISPLAY,
     address: '123 MG Road, Bangalore',
     city: 'Bangalore',
     state: 'Karnataka',
@@ -501,7 +502,7 @@ export function AdminPage() {
   const [slaStageHours, setSlaStageHours] = useState(4)
   const [slaEnquiryHours, setSlaEnquiryHours] = useState(2)
   const [adminContact, setAdminContact] = useState<AdminContactDetails>({
-    phone: '+91 98765 43210',
+    phone: COMPANY_SUPPORT_PHONE_DISPLAY,
     email: 'admin@builtglory.com',
     ccEmail: '',
   })
@@ -522,7 +523,7 @@ export function AdminPage() {
     weeklyEmail: false,
   })
   const [alertEmail, setAlertEmail] = useState('admin@builtglory.com')
-  const [alertWhatsApp, setAlertWhatsApp] = useState('+91 98765 43210')
+  const [alertWhatsApp, setAlertWhatsApp] = useState(COMPANY_SUPPORT_PHONE_DISPLAY)
 
   const [auditDate, setAuditDate] = useState('month')
   const [auditAdmin, setAuditAdmin] = useState('all')
@@ -3053,7 +3054,7 @@ function GeneralTabContent({
               <input
                 value={contactDraft.phone}
                 onChange={(e) => setContactDraft((c) => ({ ...c, phone: e.target.value }))}
-                placeholder="+91 98765 43210"
+                placeholder={COMPANY_SUPPORT_PHONE_DISPLAY}
                 className="mt-1 h-9 w-full rounded-md border border-border bg-input px-3 text-sm"
               />
               <span className="mt-1 block text-xs text-muted-foreground">

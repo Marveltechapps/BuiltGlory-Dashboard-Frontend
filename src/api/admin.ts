@@ -413,8 +413,12 @@ export async function getAdminOverview(accessToken: string) {
 }
 
 export function storeAdminSession(session: AdminSession) {
+  const { passwordHash: _passwordHash, ...admin } = session.admin as AdminUser & {
+    passwordHash?: string
+  }
   const stored: StoredAdminSession = {
     ...session,
+    admin,
     loggedInAt: new Date().toISOString(),
     accessTokenExpiresAt: Date.now() + session.expiresInSeconds * 1000,
   }

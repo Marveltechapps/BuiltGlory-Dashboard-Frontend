@@ -66,6 +66,7 @@ import {
 import { getAdminSettings } from '@/api/adminSettings'
 import { listAdminUsers, type User } from '@/api/adminUsers'
 import { cn } from '@/lib/utils'
+import { COMPANY_SUPPORT_PHONE_DISPLAY } from '@/config/companyContact'
 import { findUnknownTemplateVars } from '@/utils/edgeCases'
 import {
   formatChannel,
@@ -1653,13 +1654,13 @@ export function ToolsPage() {
     companyName: 'Builtglory',
     companyWebsite: 'www.builtglory.com',
     supportEmail: 'support@builtglory.com',
-    supportPhone: '+91 80 1234 5678',
+    supportPhone: COMPANY_SUPPORT_PHONE_DISPLAY,
     appDescription:
       "Builtglory is India's premier real estate platform connecting buyers and sellers.",
     instagram: '',
     linkedin: '',
     twitter: '',
-    whatsapp: '',
+    whatsapp: COMPANY_SUPPORT_PHONE_DISPLAY,
   })
   const [forceUpdateMinVersion, setForceUpdateMinVersion] = useState('1.0.0')
   const [forceUpdateEnabled, setForceUpdateEnabled] = useState(false)

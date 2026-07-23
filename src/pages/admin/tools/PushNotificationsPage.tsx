@@ -10,6 +10,7 @@ import {
   type PushNotificationType,
 } from '@/api/adminPushNotifications'
 import { listAdminUsers, type User } from '@/api/adminUsers'
+import { resolveMasterDeepLink } from '@/utils/notifications'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -71,6 +72,14 @@ export function PushNotificationsPage() {
     [notificationType],
   )
 
+  const resolvedDeepLink = useMemo(
+    () =>
+      notificationType === 'MANUAL'
+        ? selectedType.screen
+        : resolveMasterDeepLink(notificationType, audience) || selectedType.screen,
+    [audience, notificationType, selectedType.screen],
+  )
+
   const filteredUsers = useMemo(
     () =>
       users.filter((user) => {
@@ -126,7 +135,7 @@ export function PushNotificationsPage() {
         notificationType,
         title: title.trim(),
         message: message.trim(),
-        screen: selectedType.screen,
+        screen: resolvedDeepLink,
         listingId: listingId || undefined,
         enquiryId: enquiryId || undefined,
         dealId: dealId || undefined,

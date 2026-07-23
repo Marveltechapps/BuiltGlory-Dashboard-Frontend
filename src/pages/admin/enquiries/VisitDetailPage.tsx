@@ -530,6 +530,7 @@ export function VisitDetailPage() {
     const msg = sendPushNotification(visit.buyerName, template, 'N-03', {
       dedupeKey: `N-03:${visit.id}`,
       audience: 'buyer',
+      userId: visit.buyerUserId,
       relatedTo: { type: 'visit', id: visit.id },
     })
     setToast(`Visit confirmed. Buyer notified via N-03. ${msg}`)
@@ -571,6 +572,7 @@ export function VisitDetailPage() {
       sendPushNotification(visit.buyerName, template, 'N-03', {
         dedupeKey: `N-03:cancel:${visit.id}`,
         audience: 'buyer',
+        userId: visit.buyerUserId,
         relatedTo: { type: 'visit', id: visit.id },
       })
     }

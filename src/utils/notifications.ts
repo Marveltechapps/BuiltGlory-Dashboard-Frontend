@@ -11,6 +11,35 @@ export type NotificationTemplate = {
 }
 
 /**
+ * Master Document Part 8 — audience-specific deep links for N-01..N-08.
+ */
+export const MASTER_NOTIFICATION_DEEP_LINKS: Record<
+  string,
+  { buyer?: string; seller?: string }
+> = {
+  'N-01': { buyer: 'P-08' },
+  'N-02': { buyer: 'P-08', seller: 'P-05' },
+  'N-03': { buyer: 'B-12' },
+  'N-04': { seller: 'SL-12', buyer: 'SL-12' },
+  'N-05': { buyer: 'B-13', seller: 'SL-14' },
+  'N-06': { buyer: 'B-14', seller: 'SL-11' },
+  'N-07': { buyer: 'B-15', seller: 'SL-15' },
+  'N-08': { buyer: 'B-16', seller: 'SL-16' },
+}
+
+export function resolveMasterDeepLink(
+  notificationType: string,
+  audience: NotificationAudience = 'buyer',
+): string {
+  const normalized = notificationType.trim().toUpperCase().replace(/^N(\d)$/, 'N-0$1')
+  const digits = normalized.replace(/\D/g, '')
+  const code = digits.length ? `N-${digits.padStart(2, '0')}` : normalized
+  const entry = MASTER_NOTIFICATION_DEEP_LINKS[code]
+  if (!entry) return ''
+  return (audience === 'seller' && entry.seller) || entry.buyer || entry.seller || ''
+}
+
+/**
  * Master Document Part 8 — Notification Map.
  * Buyer: N-01→P-08, N-02→P-08, N-03→B-12, N-05→B-13, N-06→B-14, N-07→B-15, N-08→B-16
  * Seller: N-02→P-05, N-04→SL-12, N-05→SL-14, N-06→SL-11, N-07→SL-15, N-08→SL-16
@@ -289,13 +318,13 @@ export type SendPushOptions = {
 }
 
 /** Sends workflow-backed push notifications and returns a user-facing result message. */
-export function sendPushNotification(
+export async function sendPushNotification(
   userName: string,
   template: NotificationTemplate,
   notificationId: string,
   options?: SendPushOptions,
-): string {
-  const dedupeKey = options?.dedupeKey ?? `${notificationId}:${userName}:${template.title}`
+): Promise<string> {
+  const dedupeKey = options?.dedupeKey ?? `${notificationId}:${options?.relatedTo?.type ?? 'manual'}:${options?.relatedTo?.id ?? userName}`;
   if (!options?.skipDuplicateCheck && wasNotificationSentRecently(dedupeKey)) {
     return `Similar notification sent recently (${notificationId})`
   }
@@ -305,19 +334,24 @@ export function sendPushNotification(
     return `Push notification not sent: backend workflow target is unavailable (${notificationId})`
   }
 
-  markNotificationSent(dedupeKey)
-  void sendWorkflowPush(session.accessToken, options.relatedTo.type, options.relatedTo.id, {
-    userId: options.userId,
-    recipient: userName,
-    notificationId,
-    audience: options.audience || template.audience,
-    template: {
-      title: template.title,
-      body: template.body,
-      deepLink: template.deepLink,
-    },
-    dedupeKey,
-    skipDuplicateCheck: true,
-  }).catch(() => undefined)
-  return `Push notification sent to ${userName}: "${template.title}"`
+  try {
+    await sendWorkflowPush(session.accessToken, options.relatedTo.type, options.relatedTo.id, {
+      userId: options.userId,
+      recipient: userName,
+      notificationId,
+      audience: options.audience || template.audience,
+      template: {
+        title: template.title,
+        body: template.body,
+        deepLink: template.deepLink,
+      },
+      dedupeKey,
+      skipDuplicateCheck: true,
+    })
+    markNotificationSent(dedupeKey)
+    return `Push notification sent to ${userName}: "${template.title}"`
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Push notification failed.'
+    return `Push notification failed for ${userName}: ${message}`
+  }
 }

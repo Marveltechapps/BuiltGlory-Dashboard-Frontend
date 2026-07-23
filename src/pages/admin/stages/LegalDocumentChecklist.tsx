@@ -6,7 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { DEFAULT_SENT_BY, formatMessageTimeAgo, logMessage } from '@/utils/messageLog'
-import { NOTIFICATION_TEMPLATES, sendPushNotification } from '@/utils/notifications'
+import {
+  NOTIFICATION_TEMPLATES,
+  sendPushNotification,
+  type NotificationAudience,
+  type SendPushOptions,
+} from '@/utils/notifications'
 
 export type FileStatus = 'uploaded' | 'verified' | 'rejected' | 'awaiting_upload'
 
@@ -492,11 +497,47 @@ function buildSendEmailContent(
   }
 }
 
-function buildSendPushContent(documentName: string, propertyTitle: string) {
+function buildSendPushContent(
+  documentName: string,
+  propertyTitle: string,
+  audience: NotificationAudience,
+) {
+  const template = NOTIFICATION_TEMPLATES.N06_DOCS_SHARED('', propertyTitle)
   return {
-    title: 'Document Shared 📄',
+    title: template.title,
     body: `${documentName} for ${propertyTitle} has been shared with you. Check the app.`,
-    deepLink: 'Documents',
+    deepLink: audience === 'seller' ? 'SL-11' : 'B-14',
+    audience,
+  }
+}
+
+function buildSendAllPushContent(
+  documentCount: number,
+  propertyTitle: string,
+  audience: NotificationAudience,
+) {
+  const template = NOTIFICATION_TEMPLATES.N06_DOCS_SHARED('', propertyTitle)
+  return {
+    title: template.title,
+    body: `${documentCount} documents for ${propertyTitle} have been shared with you. Check the app.`,
+    deepLink: audience === 'seller' ? 'SL-11' : 'B-14',
+    audience,
+  }
+}
+
+function workflowPushOptions(
+  partyType: NotificationAudience,
+  relatedToType: 'acquisition' | 'deal',
+  dealId: string,
+  partyUserId: string | null | undefined,
+  dedupeKey: string,
+): SendPushOptions {
+  return {
+    audience: partyType,
+    userId: partyUserId,
+    relatedTo: { type: relatedToType, id: dealId },
+    dedupeKey,
+    skipDuplicateCheck: true,
   }
 }
 
@@ -567,6 +608,7 @@ export interface LegalDocumentChecklistProps {
   partyPhone: string | null
   partyEmail: string | null
   partyType: 'seller' | 'buyer'
+  partyUserId?: string | null
   propertyTitle: string
   documents: LegalDocumentItem[]
   setDocuments: React.Dispatch<React.SetStateAction<LegalDocumentItem[]>>
@@ -591,7 +633,8 @@ export function LegalDocumentChecklist({
   partyName,
   partyPhone,
   partyEmail,
-  partyType: _partyType,
+  partyType,
+  partyUserId,
   propertyTitle,
   documents,
   setDocuments,
@@ -897,8 +940,13 @@ export function LegalDocumentChecklist({
         email,
       )
     } else {
-      const push = buildSendPushContent(documentName, propertyTitle)
-      sendPushNotification(partyName, push, 'N-SEND-DOC')
+      const push = buildSendPushContent(documentName, propertyTitle, partyType)
+      sendPushNotification(
+        partyName,
+        push,
+        'N-06',
+        workflowPushOptions(partyType, relatedToType, dealId, partyUserId, `N-06:send-doc:${dealId}:${doc.id}`),
+      )
       recordDocumentSend('push', documentName, `${push.title}\n${push.body}`, doc.id, isCustom, partyName)
     }
 
@@ -969,12 +1017,19 @@ export function LegalDocumentChecklist({
         relatedTo: { type: relatedToType, id: dealId, title: propertyTitle },
       })
     } else {
-      const push = {
-        title: 'Documents Shared 📄',
-        body: `${sendableDocs.length} documents for ${propertyTitle} have been shared with you. Check the app.`,
-        deepLink: 'Documents',
-      }
-      sendPushNotification(partyName, push, 'N-SEND-ALL')
+      const push = buildSendAllPushContent(sendableDocs.length, propertyTitle, partyType)
+      sendPushNotification(
+        partyName,
+        push,
+        'N-06',
+        workflowPushOptions(
+          partyType,
+          relatedToType,
+          dealId,
+          partyUserId,
+          `N-06:send-all:${dealId}:${sendableDocs.length}`,
+        ),
+      )
       logMessage({
         channel: 'push',
         to: partyName,
@@ -1132,7 +1187,18 @@ export function LegalDocumentChecklist({
       documentName,
       propertyTitle,
     )
-    sendPushNotification(partyName, template, 'N-18')
+    sendPushNotification(
+      partyName,
+      template,
+      'N-18',
+      workflowPushOptions(
+        partyType,
+        relatedToType,
+        dealId,
+        partyUserId,
+        `N-18:request:${dealId}:${docId}`,
+      ),
+    )
     recordDocumentRequest(
       'push',
       documentName,
@@ -2093,7 +2159,7 @@ export function LegalDocumentChecklist({
                   return `Subject: ${subject}\n\n${body}`
                 })()
               : (() => {
-                  const push = buildSendPushContent(doc.name, propertyTitle)
+                  const push = buildSendPushContent(doc.name, propertyTitle, partyType)
                   return `Title: ${push.title}\n\n${push.body}`
                 })()
 

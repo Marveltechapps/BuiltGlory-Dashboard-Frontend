@@ -471,6 +471,7 @@ export function SellRequestDetailPage() {
       let msg = sendPushNotification(userName, template, notificationId, {
         dedupeKey,
         audience: template.audience || 'seller',
+        userId: request?.sellerId,
         relatedTo: request ? { type: 'sell-request', id: request.id } : undefined,
       })
       if (msg.includes('recently') && window.confirm(`${msg}\n\nSend again anyway?`)) {
@@ -478,6 +479,7 @@ export function SellRequestDetailPage() {
           skipDuplicateCheck: true,
           dedupeKey,
           audience: template.audience || 'seller',
+          userId: request?.sellerId,
           relatedTo: request ? { type: 'sell-request', id: request.id } : undefined,
         })
       }

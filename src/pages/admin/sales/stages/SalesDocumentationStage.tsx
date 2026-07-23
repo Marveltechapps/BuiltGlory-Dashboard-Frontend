@@ -937,6 +937,7 @@ export function SalesDocumentationStage({ deal, onStageChange }: SalesDocumentat
         partyPhone={deal.buyerPhone}
         partyEmail={deal.buyerEmail}
         partyType="buyer"
+        partyUserId={deal.buyerUserId}
         propertyTitle={deal.propertyTitle}
         documents={documents}
         setDocuments={setPersistedDocuments}
