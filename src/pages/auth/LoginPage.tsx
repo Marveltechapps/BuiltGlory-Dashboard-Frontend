@@ -109,7 +109,7 @@ export function LoginPage() {
         (err instanceof Error && /failed to fetch|network|load failed/i.test(err.message))
       setAuthError(
         isNetworkError
-          ? 'Cannot reach the API server. Start the backend with `npm run dev` in Backend-V1 (port 3000).'
+          ? 'Cannot reach the API server. Start the backend with `npm run dev` in Backend-V1 (port 5001).'
           : err instanceof AdminApiError
             ? err.message
             : 'Could not sign in. Please try again.',

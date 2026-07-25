@@ -25,7 +25,7 @@ Copy `.env.example` to `.env` and set:
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_API_URL` | Backend origin (e.g. `http://localhost:3000`). `/api/v1` is appended in the API client. |
+| `VITE_API_URL` | Backend origin (e.g. `http://localhost:5001`). `/api/v1` is appended in the API client. |
 
 ## Scripts
 
