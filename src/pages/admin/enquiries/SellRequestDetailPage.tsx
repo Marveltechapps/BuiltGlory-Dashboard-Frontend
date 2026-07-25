@@ -462,20 +462,20 @@ export function SellRequestDetailPage() {
   const toastApi = useMemo(() => bindToast(setToast), [])
 
   const dispatchPush = useCallback(
-    (
+    async (
       userName: string,
       template: NotificationTemplate,
       notificationId: string,
       dedupeKey?: string,
     ) => {
-      let msg = sendPushNotification(userName, template, notificationId, {
+      let msg = await sendPushNotification(userName, template, notificationId, {
         dedupeKey,
         audience: template.audience || 'seller',
         userId: request?.sellerId,
         relatedTo: request ? { type: 'sell-request', id: request.id } : undefined,
       })
       if (msg.includes('recently') && window.confirm(`${msg}\n\nSend again anyway?`)) {
-        msg = sendPushNotification(userName, template, notificationId, {
+        msg = await sendPushNotification(userName, template, notificationId, {
           skipDuplicateCheck: true,
           dedupeKey,
           audience: template.audience || 'seller',

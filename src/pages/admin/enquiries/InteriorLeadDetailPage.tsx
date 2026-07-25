@@ -244,18 +244,18 @@ export function InteriorLeadDetailPage() {
   const showToast = useCallback((msg: string) => setToast(msg), [])
 
   const dispatchPush = useCallback(
-    (
+    async (
       userName: string,
       template: ReturnType<typeof NOTIFICATION_TEMPLATES.N09_INTERIOR_QUOTE>,
       notificationId: string,
       dedupeKey?: string,
     ) => {
-      let msg = sendPushNotification(userName, template, notificationId, {
+      let msg = await sendPushNotification(userName, template, notificationId, {
         dedupeKey,
         relatedTo: lead ? { type: 'interior', id: lead.id } : undefined,
       })
       if (msg.includes('recently') && window.confirm(`${msg}\n\nSend again?`)) {
-        msg = sendPushNotification(userName, template, notificationId, {
+        msg = await sendPushNotification(userName, template, notificationId, {
           skipDuplicateCheck: true,
           dedupeKey,
           relatedTo: lead ? { type: 'interior', id: lead.id } : undefined,

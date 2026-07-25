@@ -5,9 +5,10 @@ node_modules/
 dist/
 dist-ssr/
 
-# dotenv — local secrets, examples, and non-production env
+# dotenv — local secrets (keep .env.example committed for fresh clones)
 .env
 .env.*
+!.env.example
 *.local
 
 # logs

@@ -494,7 +494,7 @@ export function EnquiryDetailPage() {
           sendPushNotification(updated.buyerName, template, 'N-02', {
             dedupeKey: `N-02:${updated.id}`,
             audience: 'buyer',
-            userId: updated.buyerUserId,
+            userId: updated.buyerId,
             relatedTo: { type: 'enquiry', id: updated.id },
           })
           setToast('Response recorded. Buyer notified via N-02.')

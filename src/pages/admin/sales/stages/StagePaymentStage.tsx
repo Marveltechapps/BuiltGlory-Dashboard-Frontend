@@ -266,19 +266,19 @@ export function StagePaymentStage({ deal, onStageChange }: StagePaymentStageProp
   }, [])
 
   const dispatchPush = useCallback(
-    (
+    async (
       template: { title: string; body: string; deepLink: string },
       notificationId: string,
       dedupeKey?: string,
     ) => {
-      let msg = sendPushNotification(deal.buyerName, template, notificationId, {
+      let msg = await sendPushNotification(deal.buyerName, template, notificationId, {
         dedupeKey,
         audience: 'buyer',
         userId: deal.buyerUserId,
         relatedTo: { type: 'deal', id: deal.id },
       })
       if (msg.includes('recently') && window.confirm(`${msg}\n\nSend again?`)) {
-        msg = sendPushNotification(deal.buyerName, template, notificationId, {
+        msg = await sendPushNotification(deal.buyerName, template, notificationId, {
           skipDuplicateCheck: true,
           dedupeKey,
           audience: 'buyer',
@@ -289,7 +289,7 @@ export function StagePaymentStage({ deal, onStageChange }: StagePaymentStageProp
       showToast(msg)
       return !msg.includes('recently')
     },
-    [deal.buyerName, showToast],
+    [deal.buyerName, deal.buyerUserId, deal.id, showToast],
   )
 
   const [callLogs, setCallLogs] = useState<CallLogEntry[]>([])

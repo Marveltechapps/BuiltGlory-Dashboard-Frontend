@@ -249,7 +249,7 @@ function SalesDealRightColumn({
   messageRefresh,
 }: {
   deal: SalesDeal
-  onUpdate: (patch: Partial<SalesDeal>) => void | Promise<void>
+  onUpdate: (patch: Partial<SalesDeal>) => void | Promise<void> | Promise<boolean>
   toast: string | null
   onToast: (msg: string | null) => void
   messageRefresh: number

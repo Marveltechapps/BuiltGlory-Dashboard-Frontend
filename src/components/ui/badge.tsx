@@ -1,6 +1,17 @@
 import { cn } from '@/lib/utils'
 
-type BadgeVariant = 'default' | 'new' | 'responded' | 'pending' | 'red' | 'blue' | 'orange' | 'sla'
+type BadgeVariant =
+  | 'default'
+  | 'new'
+  | 'responded'
+  | 'pending'
+  | 'red'
+  | 'blue'
+  | 'orange'
+  | 'sla'
+  | 'outline'
+  | 'secondary'
+  | 'destructive'
 
 const variantStyles: Record<BadgeVariant, string> = {
   default: 'bg-muted text-muted-foreground',
@@ -11,6 +22,9 @@ const variantStyles: Record<BadgeVariant, string> = {
   blue: 'bg-blue-100 text-blue-700',
   orange: 'bg-orange-100 text-orange-700',
   sla: 'bg-amber-100 text-amber-800 text-[10px]',
+  outline: 'border border-input bg-transparent text-foreground',
+  secondary: 'bg-secondary text-secondary-foreground',
+  destructive: 'bg-destructive/10 text-destructive',
 }
 
 interface BadgeProps {
